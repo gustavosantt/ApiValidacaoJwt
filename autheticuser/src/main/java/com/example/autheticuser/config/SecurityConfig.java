@@ -14,6 +14,10 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
+
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
+import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
+
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
@@ -43,28 +47,42 @@ public class SecurityConfig {
                 .orElseThrow(() -> new UsernameNotFoundException("Usuário não encontrado: " + username));
     }
 
+
+    @Bean
+public JwtAuthenticationConverter jwtAuthenticationConverter() {
+    JwtGrantedAuthoritiesConverter converter = new JwtGrantedAuthoritiesConverter();
+    converter.setAuthoritiesClaimName("authorities"); // Essa é a claim que você coloca no token
+    converter.setAuthorityPrefix(""); // Já estamos incluindo "ROLE_" no token
+
+    JwtAuthenticationConverter authConverter = new JwtAuthenticationConverter();
+    authConverter.setJwtGrantedAuthoritiesConverter(converter);
+    return authConverter;
+}
+
     @Bean
     public JwtDecoder jwtDecoder() {
         SecretKeySpec secretKey = new SecretKeySpec(jwtSecret.getBytes(StandardCharsets.UTF_8), "HmacSha256");
         return NimbusJwtDecoder.withSecretKey(secretKey).build();
     }
 
+    /**
+     * @param http
+     * @return
+     * @throws Exception
+     */
     @SuppressWarnings("removal")
     @Bean
+    
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http
-            .csrf(csrf -> csrf.disable()) // Desabilita CSRF, ok para APIs REST
-            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // Sem sessão de usuário
-            .authorizeHttpRequests(auth -> auth
-            .requestMatchers("/", "/auth/login", "/auth/validate", "/h2-console/**", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
-                .anyRequest().authenticated() // Qualquer outra rota exige autenticação
-            )
-            .headers(headers -> headers.frameOptions(frame -> frame.sameOrigin())); // Reativa se for usar H2 console
-    
-            // .oauth2ResourceServer(oauth2 -> oauth2.jwt()); // Deixe comentado enquanto testa sem JWT
-    
-        return http.build();
-    }
+    http
+        .csrf(csrf -> csrf.disable())
+        .headers(headers -> headers.frameOptions().sameOrigin())
+        .authorizeHttpRequests(auth -> auth
+            .anyRequest().permitAll() // ← Libera tudo, só pra depurar
+        )
+        .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+    return http.build();
+}
 
     @Bean
     public CommandLineRunner initData(Userrepository userRepository, PasswordEncoder passwordEncoder) {

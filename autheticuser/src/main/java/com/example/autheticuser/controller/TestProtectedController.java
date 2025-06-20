@@ -11,7 +11,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @RestController
 @RequestMapping("/api")
 @Tag(name = "Recursos Protegidos", description = "Endpoints que exigem autenticação JWT")
-@SecurityRequirement(name = "bearerAuth") // Indica que este controller requer um JWT válido
+@SecurityRequirement(name = "bearerAuth") // este controller requer um JWT válido
 public class TestProtectedController {
 
     @Operation(summary = "Endpoint acessível por qualquer usuário autenticado")

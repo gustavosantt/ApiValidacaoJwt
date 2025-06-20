@@ -2,20 +2,21 @@ package com.example.autheticuser.controller;
 
 import com.example.autheticuser.service.AuthService;
 import com.example.autheticuser.service.JwtService;
+import com.example.autheticuser.model.LoginRequest;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
+import java.util.Map;
+
+@CrossOrigin(origins = "*") // ← Isso permite chamadas do Swagger sem 403
 @RestController
 @RequestMapping("/auth")
 @Tag(name = "Autenticação", description = "Endpoints para login e geração/validação de tokens JWT")
@@ -29,23 +30,27 @@ public class AuthController {
         this.jwtService = jwtService;
     }
 
-    /**
-     * Realiza o login do usuário e emite um token JWT.
-     */
     @Operation(summary = "Realiza o login do usuário e emite um token JWT")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Login bem-sucedido, retorna o token JWT"),
         @ApiResponse(responseCode = "401", description = "Credenciais inválidas")
     })
     @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestParam String username, @RequestParam String password) {
+    public ResponseEntity<Map<String, String>> login(@RequestBody LoginRequest request) {
         try {
-            String token = authService.authenticateUserAndGenerateToken(username, password);
-            return ResponseEntity.ok(token);
+            String token = authService.authenticateUserAndGenerateToken(
+                request.getUsername(), request.getPassword());
+
+            return ResponseEntity.ok(Map.of(
+                "token_type", "Bearer",
+                "access_token", token
+            ));
         } catch (BadCredentialsException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(Map.of("error", "Credenciais inválidas"));
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Ocorreu um erro interno ao tentar logar.");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(Map.of("error", "Ocorreu um erro interno ao tentar logar."));
         }
     }
 

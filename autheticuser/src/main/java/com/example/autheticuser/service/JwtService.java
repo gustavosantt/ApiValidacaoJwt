@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -31,7 +32,7 @@ public class JwtService {
     public String generateToken(String username, String role) {
         return Jwts.builder()
                 .setSubject(username) // Define o nome de usuário como 'subject'
-                .claim("role", role)  // Define a role como claim
+                .claim("authorities", List.of("ROLE_" + role)) // <- ESSA linha importa!
                 .setIssuedAt(new Date()) // Define a data de emissão
                 .setExpiration(new Date(System.currentTimeMillis() + expirationTime)) // Define o tempo de expiração
                 .signWith(SignatureAlgorithm.HS256, secretKey) // Assina com a chave secreta usando o algoritmo HS256

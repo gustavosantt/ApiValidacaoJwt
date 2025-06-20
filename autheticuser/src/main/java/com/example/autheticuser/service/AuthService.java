@@ -14,25 +14,18 @@ import java.util.Optional;
 @Service
 public class AuthService {
 
-    private final Userrepository Userrepository;
+    private final Userrepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    private final JwtService jwtService; // Injeta o serviço de JWT
+    private final JwtService jwtService;
 
     public AuthService(Userrepository userRepository, PasswordEncoder passwordEncoder, JwtService jwtService) {
-        this.Userrepository = userRepository;
+        this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
     }
 
-    /**
-     * Autentica um usuário e, se bem-sucedido, gera e retorna um token JWT.
-     * @param username Nome de usuário.
-     * @param password Senha em texto claro.
-     * @return O token JWT.
-     * @throws BadCredentialsException Se as credenciais forem inválidas.
-     */
     public String authenticateUserAndGenerateToken(String username, String password) {
-        Optional<User> userOptional = Userrepository.findByUsername(username);
+        Optional<User> userOptional = userRepository.findByUsername(username);
 
         if (userOptional.isEmpty()) {
             throw new BadCredentialsException("Credenciais inválidas: Usuário não encontrado.");
@@ -47,4 +40,5 @@ public class AuthService {
         return jwtService.generateToken(user.getUsername(), user.getRole());
     }
 }
+
 
