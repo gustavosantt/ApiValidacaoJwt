@@ -53,7 +53,7 @@ class JwtServiceTest {
     void testGenerateToken_ContainsCorrectClaims() {
         // Arrange
         String username = "admin";
-        String role = "ADMIN";
+        String role = "admin";
 
         // Act
         String token = jwtService.generateToken(username, role);
@@ -178,11 +178,11 @@ class JwtServiceTest {
     }
 
     @Test
-    @DisplayName("Token com role ADMIN deve conter authorities corretas")
+    @DisplayName("Token com role admin deve conter authorities corretas")
     void testGenerateToken_AdminRole() {
         // Arrange
         String username = "admin";
-        String role = "ADMIN";
+        String role = "admin";
 
         // Act
         String token = jwtService.generateToken(username, role);

@@ -107,24 +107,24 @@ class AuthServiceTest {
     }
 
     @Test
-    @DisplayName("Autenticação com usuário admin deve gerar token com role ADMIN")
+    @DisplayName("Autenticação com usuário admin deve gerar token com role admin")
     void testAuthenticateUserAndGenerateToken_AdminUser() {
         // Arrange
-        User adminUser = new User(2L, "admin", "encodedPassword", "ADMIN");
+        User adminUser = new User(2L, "admin", "encodedPassword", "admin");
         String username = "admin";
         String password = "adminpass";
         String expectedToken = "admin.jwt.token";
 
         when(userRepository.findByUsername(username)).thenReturn(Optional.of(adminUser));
         when(passwordEncoder.matches(password, adminUser.getPassword())).thenReturn(true);
-        when(jwtService.generateToken(username, "ADMIN")).thenReturn(expectedToken);
+        when(jwtService.generateToken(username, "admin")).thenReturn(expectedToken);
 
         // Act
         String result = authService.authenticateUserAndGenerateToken(username, password);
 
         // Assert
         assertEquals(expectedToken, result);
-        verify(jwtService).generateToken(username, "ADMIN");
+        verify(jwtService).generateToken(username, "admin");
     }
 
     @Test
