@@ -11,9 +11,10 @@ public class HomeController {
         return "🚀 API Autheticuser está funcionando!";
     }
 
-    @GetMapping("/auth/login")
-    public String auth() {
-        return "Por aqui está ok";
-    }
+    /*
+     * @GetMapping("/auth/login")
+     * public String auth() {
+     * return "Por aqui está ok";
+     * }
+     */
 }
-
