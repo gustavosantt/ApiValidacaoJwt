@@ -52,14 +52,16 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-            .csrf(csrf -> csrf.disable())
-            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/", "/auth/login", "/auth/validate", "/h2-console/**", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
-                .anyRequest().authenticated()
-            )
-            .headers(headers -> headers.frameOptions(frame -> frame.sameOrigin()));
-            // .oauth2ResourceServer(oauth2 -> oauth2.jwt()); // ← Comentado temporariamente para permitir testes sem JWT
+                .csrf(csrf -> csrf.disable())
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/", "/auth/login", "/auth/validate", "/h2-console/**", "/swagger-ui/**",
+                                "/v3/api-docs/**")
+                        .permitAll()
+                        .anyRequest().authenticated())
+                .headers(headers -> headers.frameOptions(frame -> frame.sameOrigin()));
+        // .oauth2ResourceServer(oauth2 -> oauth2.jwt()); // ← Comentado temporariamente
+        // para permitir testes sem JWT
 
         return http.build();
     }
@@ -68,7 +70,7 @@ public class SecurityConfig {
     public CommandLineRunner initData(Userrepository userRepository, PasswordEncoder passwordEncoder) {
         return args -> {
             if (userRepository.findByUsername("admin").isEmpty()) {
-                User admin = new User(null, "admin", passwordEncoder.encode("123456"), "ADMIN");
+                User admin = new User(null, "admin", passwordEncoder.encode("123456"), "admin");
                 userRepository.save(admin);
                 System.out.println("✅ Usuário 'admin' criado com senha codificada.");
             }

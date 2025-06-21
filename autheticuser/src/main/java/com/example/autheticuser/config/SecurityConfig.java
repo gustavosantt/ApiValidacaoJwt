@@ -14,7 +14,6 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
-
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 
@@ -47,17 +46,16 @@ public class SecurityConfig {
                 .orElseThrow(() -> new UsernameNotFoundException("Usuário não encontrado: " + username));
     }
 
-
     @Bean
-public JwtAuthenticationConverter jwtAuthenticationConverter() {
-    JwtGrantedAuthoritiesConverter converter = new JwtGrantedAuthoritiesConverter();
-    converter.setAuthoritiesClaimName("authorities"); // Essa é a claim que você coloca no token
-    converter.setAuthorityPrefix(""); // Já estamos incluindo "ROLE_" no token
+    public JwtAuthenticationConverter jwtAuthenticationConverter() {
+        JwtGrantedAuthoritiesConverter converter = new JwtGrantedAuthoritiesConverter();
+        converter.setAuthoritiesClaimName("authorities"); // Essa é a claim que você coloca no token
+        converter.setAuthorityPrefix(""); // Já estamos incluindo "ROLE_" no token
 
-    JwtAuthenticationConverter authConverter = new JwtAuthenticationConverter();
-    authConverter.setJwtGrantedAuthoritiesConverter(converter);
-    return authConverter;
-}
+        JwtAuthenticationConverter authConverter = new JwtAuthenticationConverter();
+        authConverter.setJwtGrantedAuthoritiesConverter(converter);
+        return authConverter;
+    }
 
     @Bean
     public JwtDecoder jwtDecoder() {
@@ -72,23 +70,23 @@ public JwtAuthenticationConverter jwtAuthenticationConverter() {
      */
     @SuppressWarnings("removal")
     @Bean
-    
+
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-    http
-        .csrf(csrf -> csrf.disable())
-        .headers(headers -> headers.frameOptions().sameOrigin())
-        .authorizeHttpRequests(auth -> auth
-            .anyRequest().permitAll() // ← Libera tudo, só pra depurar
-        )
-        .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
-    return http.build();
-}
+        http
+                .csrf(csrf -> csrf.disable())
+                .headers(headers -> headers.frameOptions().sameOrigin())
+                .authorizeHttpRequests(auth -> auth
+                        .anyRequest().permitAll() // ← Libera tudo, só pra depurar
+                )
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+        return http.build();
+    }
 
     @Bean
     public CommandLineRunner initData(Userrepository userRepository, PasswordEncoder passwordEncoder) {
         return args -> {
             if (userRepository.findByUsername("admin").isEmpty()) {
-                User admin = new User(null, "admin", passwordEncoder.encode("123456"), "ADMIN");
+                User admin = new User(null, "admin", passwordEncoder.encode("123456"), "admin");
                 userRepository.save(admin);
                 System.out.println("✅ Usuário 'admin' criado com senha codificada.");
             }

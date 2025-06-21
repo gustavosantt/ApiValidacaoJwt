@@ -19,6 +19,5 @@ public class User {
     @Column(nullable = false)
     private String password; // Senha codificada
     @Column(nullable = false)
-    private String role; // Ex: "ADMIN", "USER!
+    private String role; // Ex: "admin", "USER!
 }
-
