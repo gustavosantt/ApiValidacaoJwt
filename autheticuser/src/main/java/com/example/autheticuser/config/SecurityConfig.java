@@ -4,6 +4,7 @@ import com.example.autheticuser.model.User;
 import com.example.autheticuser.repository.Userrepository;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -25,6 +26,7 @@ import org.springframework.beans.factory.annotation.Value;
 
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity(prePostEnabled = true)
 public class SecurityConfig {
 
     @Value("${jwt.secret}")
@@ -63,22 +65,28 @@ public class SecurityConfig {
         return NimbusJwtDecoder.withSecretKey(secretKey).build();
     }
 
-    /**
-     * @param http
-     * @return
-     * @throws Exception
-     */
     @SuppressWarnings("removal")
     @Bean
-
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(csrf -> csrf.disable())
                 .headers(headers -> headers.frameOptions().sameOrigin())
                 .authorizeHttpRequests(auth -> auth
-                        .anyRequest().permitAll() // ← Libera tudo, só pra depurar
-                )
+                        // Endpoints públicos (sem autenticação)
+                        .requestMatchers("/auth/**").permitAll()
+                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
+                        .requestMatchers("/h2-console/**").permitAll()
+                        .requestMatchers("/actuator/**").permitAll()
+
+                        // Endpoints que requerem autenticação
+                        .requestMatchers("/api/**").authenticated()
+
+                        // Qualquer outra requisição requer autenticação
+                        .anyRequest().authenticated())
+                .oauth2ResourceServer(oauth2 -> oauth2
+                        .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter())))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+
         return http.build();
     }
 
@@ -86,7 +94,7 @@ public class SecurityConfig {
     public CommandLineRunner initData(Userrepository userRepository, PasswordEncoder passwordEncoder) {
         return args -> {
             if (userRepository.findByUsername("admin").isEmpty()) {
-                User admin = new User(null, "admin", passwordEncoder.encode("123456"), "admin");
+                User admin = new User(null, "admin", passwordEncoder.encode("123456"), "ADMIN");
                 userRepository.save(admin);
                 System.out.println("✅ Usuário 'admin' criado com senha codificada.");
             }

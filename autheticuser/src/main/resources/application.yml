@@ -42,3 +42,22 @@ springdoc:
     disable-swagger-default-url: true # Evita carregar a URL padrão do Swagger (Petstore)
   api-docs:
     path: /v3/api-docs # Caminho para os arquivos de definição da API (JSON/YAML)
+
+# 🩺 Spring Boot Actuator: Monitoramento e Métricas
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info, metrics, prometheus # Expor endpoints específicos do Actuator
+      base-path: /actuator # Caminho base para todos os endpoints do Actuator
+  endpoint:
+    health:
+      show-details: always # Mostrar detalhes completos no /actuator/health
+      show-components: always # Mostrar status de componentes individuais
+    metrics:
+      enabled: true # Habilitar endpoint de métricas
+    prometheus:
+      enabled: true # Habilitar endpoint do Prometheus
+  info:
+    env:
+      enabled: true # Incluir informações do ambiente no /actuator/info
